@@ -32,6 +32,11 @@ import { createBlock } from '@wordpress/blocks';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
 
+/**
+ * Internal dependencies
+ */
+import onReplace from './onReplace';
+
 const { getComputedStyle } = window;
 
 const name = 'core/paragraph';
@@ -52,23 +57,9 @@ class ParagraphBlock extends Component {
 	constructor() {
 		super( ...arguments );
 
-		this.onReplace = this.onReplace.bind( this );
+		this.onReplace = onReplace.bind( this );
 		this.toggleDropCap = this.toggleDropCap.bind( this );
 		this.splitBlock = this.splitBlock.bind( this );
-	}
-
-	onReplace( blocks ) {
-		const { attributes, onReplace } = this.props;
-		onReplace( blocks.map( ( block, index ) => (
-			index === 0 && block.name === name ?
-				{ ...block,
-					attributes: {
-						...attributes,
-						...block.attributes,
-					},
-				} :
-				block
-		) ) );
 	}
 
 	toggleDropCap() {
@@ -98,7 +89,6 @@ class ParagraphBlock extends Component {
 			attributes,
 			insertBlocksAfter,
 			setAttributes,
-			onReplace,
 		} = this.props;
 
 		if ( after !== null ) {
@@ -114,7 +104,7 @@ class ParagraphBlock extends Component {
 		const { content } = attributes;
 		if ( before === null ) {
 			// If before content is omitted, treat as intent to delete block.
-			onReplace( [] );
+			this.props.onReplace( [] );
 		} else if ( content !== before ) {
 			// Only update content if it has in-fact changed. In case that user
 			// has created a new paragraph at end of an existing one, the value
@@ -128,7 +118,6 @@ class ParagraphBlock extends Component {
 			attributes,
 			setAttributes,
 			mergeBlocks,
-			onReplace,
 			className,
 			backgroundColor,
 			textColor,
@@ -245,7 +234,7 @@ class ParagraphBlock extends Component {
 					unstableOnSplit={ this.splitBlock }
 					onMerge={ mergeBlocks }
 					onReplace={ this.onReplace }
-					onRemove={ () => onReplace( [] ) }
+					onRemove={ () => this.props.onReplace( [] ) }
 					aria-label={ content ? __( 'Paragraph block' ) : __( 'Empty block; start writing or type forward slash to choose a block' ) }
 					placeholder={ placeholder || __( 'Start writing or type / to choose a block' ) }
 				/>

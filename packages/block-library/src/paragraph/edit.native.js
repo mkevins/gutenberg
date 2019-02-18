@@ -15,6 +15,7 @@ import { RichText } from '@wordpress/editor';
  * Internal dependencies
  */
 import styles from './style.scss';
+import onReplace from './onReplace';
 
 const name = 'core/paragraph';
 
@@ -22,7 +23,7 @@ class ParagraphEdit extends Component {
 	constructor( props ) {
 		super( props );
 		this.splitBlock = this.splitBlock.bind( this );
-		this.onReplace = this.onReplace.bind( this );
+		this.onReplace = onReplace.bind( this );
 
 		this.state = {
 			aztecHeight: 0,
@@ -47,7 +48,6 @@ class ParagraphEdit extends Component {
 			attributes,
 			insertBlocksAfter,
 			setAttributes,
-			onReplace,
 		} = this.props;
 
 		if ( after !== null ) {
@@ -63,27 +63,13 @@ class ParagraphEdit extends Component {
 
 		const { content } = attributes;
 		if ( before === null ) {
-			onReplace( [] );
+			this.props.onReplace( [] );
 		} else if ( content !== before ) {
 			// Only update content if it has in-fact changed. In case that user
 			// has created a new paragraph at end of an existing one, the value
 			// of before will be strictly equal to the current content.
 			setAttributes( { content: before } );
 		}
-	}
-
-	onReplace( blocks ) {
-		const { attributes, onReplace } = this.props;
-		onReplace( blocks.map( ( block, index ) => (
-			index === 0 && block.name === name ?
-				{ ...block,
-					attributes: {
-						...attributes,
-						...block.attributes,
-					},
-				} :
-				block
-		) ) );
 	}
 
 	render() {
